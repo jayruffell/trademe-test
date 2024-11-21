@@ -26,7 +26,7 @@ conv_rate_data %>%
 ggplot(aes(date_id, conversion_rate, colour = group_id)) +
     geom_point() # + geom_smooth()
 
-# add in conf intervals
+# add in conf intervals - *check if these need updating for sample population*
 ci_data <- Hmisc::binconf(x = conv_rate_data$conversions, n = conv_rate_data$n, return.df = TRUE)
 conv_rate_data <- bind_cols(conv_rate_data, ci_data)
 
@@ -42,3 +42,25 @@ sql_expanded %>%
     size = 1
   )
 
+# weekday effect? Nothing major. Biggest diff is Thurs. BUT only covers 10d so hard to analyse fully.
+conv_rate_data %>%
+    ungroup() %>%
+    select(date_id) %>%
+    unique() %>%
+    mutate(wday(date_id, label = TRUE, abbr = FALSE))
+
+# what about differences in proportions? 
+dfs_list_by_date <- conv_rate_data %>%
+    group_by(date_id) %>%
+    group_split()
+conv_rate_diffs_df <- map_df(dfs_list_by_date, calc_ci_for_diff_of_propns)
+
+conv_rate_diffs_df %>% 
+ggplot(aes(date_id, point_estimate_diff)) +
+    geom_pointrange(
+        data = conv_rate_diffs_df,
+        aes(x = date_id, y = point_estimate_diff, ymin = lower_ci_diff, ymax = upper_ci_diff),
+        size = 1
+    ) + 
+    geom_abline(slope = 0, intercept = 0)
+calc_ci_for_diff_of_propns(date_i_df)
