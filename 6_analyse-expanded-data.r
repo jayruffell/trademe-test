@@ -72,15 +72,22 @@ p4 <- sql_expanded_combined %>%
     data = conv_rate_data_combined,
     aes(x = date_id, y = PointEst, ymin = Lower, ymax = Upper, colour = group_id),
     size = 1
-  ) + xlab("date") + ylab("conversion rate")
+  ) + xlab("date") + ylab("conversion rate") +
+  theme(
+    text = element_text(size = 30),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ggsave("conv rate by group.png", p4, width = 15, height = 15)
 
 # weekday effect? Nothing major. Biggest diff is Thurs. BUT only covers 10d so hard to analyse fully.
-conv_rate_data %>%
-    ungroup() %>%
-    select(date_id) %>%
-    unique() %>%
-    mutate(wday(date_id, label = TRUE, abbr = FALSE))
+p10 <- conv_rate_data %>%
+    mutate(dow = wday(date_id, label = TRUE, abbr = FALSE, week_start = 1)) %>%
+    ggplot(aes(dow, conversion_rate, colour = group_id)) +
+    geom_point(size = 5) +
+  theme(
+    text = element_text(size = 30),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+# print(p10)
+ggsave("conv rate by dow.png", p10, width = 15, height = 15)
 
 # what about differences in proportions? 
 dfs_list_by_date <- conv_rate_data_combined %>%
@@ -95,6 +102,27 @@ ggplot(aes(date_id, point_estimate_diff)) +
         aes(x = date_id, y = point_estimate_diff, ymin = lower_ci_diff, ymax = upper_ci_diff),
         size = 1
     ) + 
-    geom_abline(slope = 0, intercept = 0, colour = "red") + xlab("date") + ylab("difference in conversion rate (A minus B)")
-print(p5)
-ggsave("conv_rate_diffs.png", p5)
+    geom_abline(slope = 0, intercept = 0, colour = "red") + xlab("date") + ylab("difference in conversion rate (A minus B)") +
+  theme(
+    text = element_text(size = 30),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+# print(p5)
+ggsave("conv_rate_diffs.png", p5, height = 15, width = 15)
+
+# anything interesting in terms of conversion rate or website usage over time?
+p6 <- sql_aggregated %>%
+    mutate(
+        session_result = ifelse(session_result == 1, "sessions that converted", "sessions that didnt convert")
+    ) %>%
+    bind_rows(sql_aggregated %>%
+        group_by(date_id, group_id) %>%
+        summarise(session_count = sum(session_count)) %>%
+        mutate(session_result = "total sessions")) %>%
+    ggplot(aes(date_id, session_count, colour = group_id)) +
+    geom_line() +
+    facet_wrap(~session_result, ncol = 1) +
+    theme(
+        text = element_text(size = 30),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+ggsave("sessions_over_time.png", p6, height = 15, width = 15)
