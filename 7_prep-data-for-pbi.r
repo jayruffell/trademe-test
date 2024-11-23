@@ -59,7 +59,7 @@ conv_rate_by_strategy_long_diff <- conv_rate_by_strategy_long %>%
 
 conv_rate_by_strategy_final <- bind_rows(
     mutate(conv_rate_by_strategy_long, type = "absolute"),
-    mutate(conv_rate_by_strategy_long_diff, type = "difference_vs_A")
+    mutate(conv_rate_by_strategy_long_diff, type = "difference vs A")
 )
 write.csv(conv_rate_by_strategy_final, "conv_rate_by_strategy_final.csv", row.names = FALSE)
 
