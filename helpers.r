@@ -29,3 +29,21 @@ calc_ci_for_diff_of_propns <- function(date_i_df) {
     row.names(result) <- NULL
     return(result)
 }
+
+# This function simulates using a model to dynamically pick the best performing strategy, then returns the conversion rate for that strategy. Since model predictions are imperfect it will return the expected conversion rate based on the probability the model picks correctly - see examples for details.
+# # PARAMS
+# - conversion_rate_A: conversion rate (as scalar proportion) for strategy A.
+# - conversion_rate_B: as above.
+# - Model_accuracy: a scalar proportion giving the probability the model will correctly pick the highest conversion rate.
+# # EXAMPLES
+# pick_best_conversion_rate(0.2, 0.3, 1.0)  # returns 0.3
+# pick_best_conversion_rate(0.3, 0.2, 1.0)  # returns 0.3
+# pick_best_conversion_rate(0.2, 0.3, 0.5)  # returns 0.25
+# pick_best_conversion_rate(0.2, 0.3, 0.75)  # returns 0.275
+pick_best_conversion_rate <- function(
+    conversion_rate_A, conversion_rate_B, model_accuracy) {
+    worst_rate <- min(conversion_rate_A, conversion_rate_B)
+    difference_in_rates <- abs(conversion_rate_A - conversion_rate_B)
+    return(worst_rate + model_accuracy * difference_in_rates)
+}
+
