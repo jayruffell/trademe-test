@@ -20,3 +20,37 @@ conv_rate_by_strategy <- conv_rate_by_strategy %>%
         dynamic_50 = pmap_dbl(list(A, B, 0.5), pick_best_conversion_rate),
         dynamic_75 = pmap_dbl(list(A, B, 0.75), pick_best_conversion_rate)
     )
+
+# convert to long format so amenable to filtering in PBI
+conv_rate_by_strategy_long <- conv_rate_by_strategy %>%
+    pivot_longer(-date_id) %>%
+    mutate(
+        strategy = ifelse(grepl("dynamic", name), "dynamic", name),
+        model_accuracy = ifelse(
+            grepl("100", name), "100",
+            ifelse(grepl("75", name), "75",
+                ifelse(grepl("50", name), "50", NA)
+            )
+        )
+    ) %>%
+    select(-name) %>%
+    rename(conversion_rate = value)
+
+# re-calc conv rates as diff versus the status quo (A)
+conv_rate_strategy_A <- select(conv_rate_by_strategy, date_id, A)
+conv_rate_by_strategy_long_diff <- conv_rate_by_strategy_long %>%
+    left_join(conv_rate_strategy_A, by = "date_id") %>%
+    mutate(conversion_rate = conversion_rate - A) %>%
+    select(-A)
+
+conv_rate_by_strategy_final <- bind_rows(
+    mutate(conv_rate_by_strategy_long, type = "absolute"),
+    mutate(conv_rate_by_strategy_long_diff, type = "diff")
+)
+write.csv(conv_rate_by_strategy_final, "conv_rate_by_strategy_final.csv", row.names = FALSE)
+
+# double check long data captured everything correctly
+conv_rate_by_strategy_final %>%
+ggplot(aes(date_id, conversion_rate)) + 
+geom_point() + 
+facet_grid(vars(strategy, model_accuracy), vars(type))
