@@ -41,7 +41,8 @@ conv_rate_strategy_A <- select(conv_rate_by_strategy, date_id, A)
 conv_rate_by_strategy_long_diff <- conv_rate_by_strategy_long %>%
     left_join(conv_rate_strategy_A, by = "date_id") %>%
     mutate(conversion_rate = conversion_rate - A) %>%
-    select(-A)
+    select(-A) %>%
+    filter(strategy != "A")
 
 conv_rate_by_strategy_final <- bind_rows(
     mutate(conv_rate_by_strategy_long, type = "absolute"),
@@ -49,8 +50,18 @@ conv_rate_by_strategy_final <- bind_rows(
 )
 write.csv(conv_rate_by_strategy_final, "conv_rate_by_strategy_final.csv", row.names = FALSE)
 
-# double check long data captured everything correctly
-conv_rate_by_strategy_final %>%
-ggplot(aes(date_id, conversion_rate)) + 
-geom_point() + 
-facet_grid(vars(strategy, model_accuracy), vars(type))
+# # double check long data captured everything correctly
+# conv_rate_by_strategy_final %>%
+#     ggplot(aes(date_id, conversion_rate)) +
+#     geom_point() +
+#     facet_grid(vars(strategy, model_accuracy), vars(type))
+
+# conv_rate_by_strategy_final %>%
+#     group_by(strategy, model_accuracy, type) %>%
+#     summarise(summed_conversion_rate = sum(conversion_rate)) %>%
+#     ggplot(aes(strategy, summed_conversion_rate)) +
+#     geom_point() +
+#     facet_grid(vars(model_accuracy), vars(type))
+
+# conv_rate_by_strategy_final %>%
+#     filter(date_id == "28/06/2018")
