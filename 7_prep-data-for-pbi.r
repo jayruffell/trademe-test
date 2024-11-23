@@ -36,6 +36,19 @@ conv_rate_by_strategy_long <- conv_rate_by_strategy %>%
     select(-name) %>%
     rename(conversion_rate = value)
 
+# to allow PBI filtering by model_accuracy to work properly need to have strategy A and strategy B rows replicated for each value of model_accuracy.
+temp_strat_A_and_B_data <- filter(
+    conv_rate_by_strategy_long, strategy %in% c("A", "B")
+)
+conv_rate_by_strategy_long <- filter(
+    conv_rate_by_strategy_long, !strategy %in% c("A", "B")
+) %>%
+    bind_rows(
+        mutate(temp_strat_A_and_B_data, model_accuracy = "100"),
+        mutate(temp_strat_A_and_B_data, model_accuracy = "75"),
+        mutate(temp_strat_A_and_B_data, model_accuracy = "50")
+    )
+
 # re-calc conv rates as diff versus the status quo (A)
 conv_rate_strategy_A <- select(conv_rate_by_strategy, date_id, A)
 conv_rate_by_strategy_long_diff <- conv_rate_by_strategy_long %>%
