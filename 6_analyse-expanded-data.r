@@ -32,7 +32,7 @@ p2 <- conv_rate_data %>%
 ci_data <- Hmisc::binconf(x = conv_rate_data$conversions, n = conv_rate_data$n, return.df = TRUE)
 conv_rate_data <- bind_cols(conv_rate_data, ci_data)
 
-# plot raw count data with conf intervals
+# plot raw count data with point estimates and conf intervals
 p3 <- sql_expanded %>%
     # sample_n(50000) %>%
     ggplot(aes(date_id, session_result, colour = group_id)) +
@@ -126,3 +126,7 @@ p6 <- sql_aggregated %>%
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
     )
 ggsave("sessions_over_time.png", p6, height = 15, width = 15)
+
+# save csvs for ingestion into PBI
+write.csv(conv_rate_data_combined, "conv_rate_data_combined.csv", row.names = FALSE)
+write.csv(conv_rate_diffs_df, "conv_rate_diffs_df.csv", row.names = FALSE)
