@@ -1,6 +1,5 @@
-# In PBI I will have a visual that lets users estimate the value of either strategy A, strategy B, or a "dynamic" strategy that uses a model to select either A or B each day. The model won't be perfectly accurate, so users will be able to play around with model accuracy.
-# This script will output a df of conversion rate based on each strategy, and PBI users will be able to input users affected and value per conversion to visualise the value of investing in each strategy.
-# These numbers will be broken down into (1) absolute conversion rate vs difference compared with strategy A (the status quo), and (2) different levels of model accuracy for the dynamic strategy. These will be used as slicer values in PBI.
+# This script creates the input csv for the trademe-test.pbix file. The PBI report lets users estimate the value of either strategy A, strategy B, or a "dynamic" strategy that uses a model to dynamically pick either A or B each day based on each strategys' predicted conversion rate. The model won't be perfectly accurate, so users will be able to play around with model accuracy to see how this changes the effectiveness of the dynamic strategy.
+# This script outputs a df of conversion rate based on each strategy, where conversion rate for "dynamic" is calculated under different scenarios of model accuracy.
 
 rm(list = ls())
 library(tidyverse)
@@ -37,7 +36,7 @@ conv_rate_by_strategy_long <- conv_rate_by_strategy %>%
     select(-name) %>%
     rename(conversion_rate_per_session = value)
 
-# to allow PBI filtering by model_accuracy to work properly need to have strategy A and strategy B rows replicated for each value of model_accuracy.
+# Replicate strategy A and strategy B rows for each value of model_accuracy - these are currently NA so disappear when filtering by model_accuracy in PBI.
 temp_strat_A_and_B_data <- filter(
     conv_rate_by_strategy_long, strategy %in% c("A", "B")
 )
@@ -62,4 +61,6 @@ conv_rate_by_strategy_final <- bind_rows(
     mutate(conv_rate_by_strategy_long, type = "absolute values"),
     mutate(conv_rate_by_strategy_long_diff, type = "difference vs A")
 )
+
+# save for ingestion into PBI
 write.csv(conv_rate_by_strategy_final, "conv_rate_by_strategy_final.csv", row.names = FALSE)
