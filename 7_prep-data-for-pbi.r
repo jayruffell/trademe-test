@@ -1,5 +1,5 @@
 # This script creates the input csv for the trademe-test.pbix file. The PBI report lets users estimate the value of either strategy A, strategy B, or a "dynamic" strategy that uses a model to dynamically pick either A or B each day based on each strategys' predicted conversion rate. The model won't be perfectly accurate, so users will be able to play around with model accuracy to see how this changes the effectiveness of the dynamic strategy.
-# This script outputs a df of conversion rate based on each strategy, where conversion rate for "dynamic" is calculated under different scenarios of model accuracy.
+# This script outputs a csv of conversion rate based on each strategy, where conversion rate for "dynamic" is calculated under different scenarios of model accuracy.
 
 rm(list = ls())
 library(tidyverse)
