@@ -5,6 +5,9 @@ source("helpers.r")
 
 con <- connect_to_db()
 sql_expanded <- collect(tbl(con, "dataExpanded"))
+
+# replace with version cald as SQL result set, rather than saved to DB.
+sql_expanded <- readr::read_csv("sql_expanded_data_test.csv")
 orig_data_recalculated <- sql_expanded %>%
     group_by(date_id, group_id, session_result) %>%
     summarise(session_count = length(session_result))
