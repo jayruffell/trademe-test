@@ -1,3 +1,4 @@
+# NOTE i shifted this to a notebook - see that file for final version (code all same, just re-ordered)
 
 library(tidyverse)
 source("helpers.r")
